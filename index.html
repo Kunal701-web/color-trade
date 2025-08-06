@@ -1,0 +1,198 @@
+<!DOCTYPE html><html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Color Trade Game - Full Demo</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #0f0f0f;
+      color: white;
+      text-align: center;
+      padding: 20px;
+    }
+    h1 {
+      color: #00ffc3;
+    }
+    .color-buttons {
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+      margin: 20px 0;
+    }
+    .color-btn {
+      width: 100px;
+      height: 100px;
+      font-size: 18px;
+      border: none;
+      border-radius: 10px;
+      color: white;
+      cursor: pointer;
+    }
+    .red { background: red; }
+    .green { background: green; }
+    .blue { background: blue; }
+    #timer {
+      font-size: 24px;
+      margin-top: 10px;
+    }
+    #result {
+      font-size: 30px;
+      margin-top: 20px;
+      font-weight: bold;
+    }
+    .footer {
+      margin-top: 40px;
+      color: gray;
+      font-size: 14px;
+    }
+    .login-register, .wallet-box {
+      margin-bottom: 20px;
+    }
+    input, select, button {
+      padding: 8px;
+      margin: 5px;
+      border-radius: 5px;
+    }
+    #history {
+      margin-top: 20px;
+      border: 1px solid white;
+      padding: 10px;
+      max-height: 200px;
+      overflow-y: scroll;
+    }
+    .admin-box {
+      margin-top: 30px;
+      border: 1px solid white;
+      padding: 10px;
+    }
+  </style>
+</head>
+<body>
+  <h1>🎮 Color Trade Game - Full Demo</h1>  <div class="login-register">
+    <input type="text" id="username" placeholder="Enter Username" />
+    <input type="password" id="password" placeholder="Enter Password" />
+    <button onclick="login()">Login</button>
+    <button onclick="register()">Register</button>
+  </div>  <div class="wallet-box">
+    Wallet Balance: ₹<span id="wallet">100</span>
+    <button onclick="addMoney(50)">+₹50</button>
+    <button onclick="withdrawMoney(50)">-₹50</button>
+  </div>  <p>Select a Timer:</p>
+  <select id="timeSelect" onchange="setTimer()">
+    <option value="30">30 seconds</option>
+    <option value="60">1 minute</option>
+    <option value="180">3 minutes</option>
+    <option value="300">5 minutes</option>
+  </select>  <p>Select your color before the timer ends:</p>
+  <div class="color-buttons">
+    <button class="color-btn red" onclick="selectColor('Red')">🔴 Red</button>
+    <button class="color-btn green" onclick="selectColor('Green')">🟢 Green</button>
+    <button class="color-btn blue" onclick="selectColor('Blue')">🔵 Blue</button>
+  </div>
+  <div id="timer">Time Left: <span id="time">30</span>s</div>
+  <div id="result"></div>  <div id="history">
+    <h3>🎲 Result History</h3>
+    <ul id="historyList"></ul>
+  </div>  <div class="admin-box">
+    <h3>🛠️ Admin Panel (Manual Result Control)</h3>
+    <button onclick="setManualResult('Red')">Force Red</button>
+    <button onclick="setManualResult('Green')">Force Green</button>
+    <button onclick="setManualResult('Blue')">Force Blue</button>
+    <p id="adminStatus"></p>
+  </div>  <script>
+    let selectedColor = null;
+    let timeLeft = 30;
+    let countdown;
+    let manualResult = null;
+    let wallet = 100;
+
+    function selectColor(color) {
+      selectedColor = color;
+      document.getElementById("result").innerText = You selected: ${color};
+    }
+
+    function setTimer() {
+      clearInterval(countdown);
+      timeLeft = parseInt(document.getElementById("timeSelect").value);
+      document.getElementById("time").innerText = timeLeft;
+      countdown = setInterval(() => {
+        timeLeft--;
+        document.getElementById("time").innerText = timeLeft;
+        if (timeLeft <= 0) {
+          clearInterval(countdown);
+          generateResult();
+        }
+      }, 1000);
+    }
+
+    function generateResult() {  
+    let result;
+      if (manualResult) {
+        result = manualResult;
+        manualResult = null;
+        document.getElementById("adminStatus").innerText = "Admin result used";
+      } else {
+        const colors = ["Red", "Green", "Blue"];
+        result = colors[Math.floor(Math.random() * colors.length)];
+        document.getElementById("adminStatus").innerText = "Random result generated";
+      }
+
+      const msg = result === selectedColor ? "🎉 You Won ₹20!" : "❌ You Lost ₹10";
+      document.getElementById("result").innerText = Result: ${result} | ${msg};
+
+      if (result === selectedColor) wallet += 20;
+      else wallet -= 10;
+      document.getElementById("wallet").innerText = wallet;
+
+      const li = document.createElement("li");
+      li.innerText = 🎯 Result: ${result} | Your Choice: ${selectedColor} | ${msg};
+      document.getElementById("historyList").prepend(li);
+    }
+
+    function login() {
+      const user = document.getElementById("username").value;
+      const pass = document.getElementById("password").value;
+      if (user && pass) {
+        alert("Logged in as: " + user);
+      } else {
+        alert("Please enter username and password.");
+      }
+    }
+
+    function register() {
+      const user = document.getElementById("username").value;
+      const pass = document.getElementById("password").value;
+      if (user && pass) {
+        alert("Registered as: " + user);
+      } else {
+        alert("Please enter username and password to register.");
+      }
+    }
+
+    function addMoney(amount) {
+      wallet += amount;
+      document.getElementById("wallet").innerText = wallet;
+    }
+
+    function withdrawMoney(amount) {
+      if (wallet >= amount) {
+        wallet -= amount;
+        document.getElementById("wallet").innerText = wallet;
+      } else {
+        alert("Not enough balance");
+      }
+    }
+
+    function setManualResult(color) {
+      manualResult = color;
+      document.getElementById("adminStatus").innerText = Next result forced to: ${color};
+    }
+
+    // Start default timer
+    setTimer();
+  </script>  <div class="footer">
+    Demo version | Full database & backend integration not included.
+  </div>
+</body>
+</html>
